@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>TOTP Token Generator</title>
+    <style>
+      :root {
+        --primary-color: #007fff;
+        --bg-color: #ffffff;
+        --fg-color: #333333;
+        --button-bg-color: #f1f1f1;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #181818;
+          --fg-color: #d3d3d3;
+          --button-bg-color: #3d3d3d;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        height: 100%;
+        text-size-adjust: 100%;
+        -moz-text-size-adjust: 100%;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body {
+        align-items: center;
+        background-color: var(--bg-color);
+        color: var(--fg-color);
+        display: flex;
+        flex-direction: column;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+          Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+        font-size: 16px;
+        height: 100%;
+        justify-content: center;
+        line-height: 1.5;
+        margin: 0;
+      }
+
+      body :focus {
+        outline-color: var(--primary-color);
+      }
+
+      body :focus:not(:focus-visible) {
+        outline-color: transparent;
+      }
+
+      body :focus-visible {
+        outline-color: var(--primary-color);
+      }
+
+      #loader {
+        animation: rotation 1s linear infinite;
+        border: 4px solid var(--primary-color);
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        display: inline-block;
+        height: 48px;
+        width: 48px;
+      }
+
+      @keyframes rotation {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      #main {
+        align-items: center;
+        display: none;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+      }
+
+      #token {
+        color: var(--primary-color);
+        font-size: 64px;
+        font-weight: bold;
+        letter-spacing: 4px;
+      }
+
+      #main > :nth-child(2) {
+        display: flex;
+        gap: 40px;
+      }
+
+      #progressbar {
+        height: 40px;
+        width: 40px;
+      }
+
+      .progressbar-text {
+        color: var(--fg-color) !important;
+        user-select: none;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+      }
+
+      a {
+        color: var(--primary-color);
+        outline: 3px solid transparent;
+        outline-offset: 4px;
+        text-decoration: none;
+        transition: all 190ms ease;
+        word-break: break-all;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      button {
+        align-items: center;
+        appearance: button;
+        background-color: var(--button-bg-color);
+        border: none;
+        border-radius: 50%;
+        color: var(--primary-color);
+        cursor: pointer;
+        display: flex;
+        font-size: inherit;
+        height: 40px;
+        justify-content: center;
+        margin: 0;
+        outline: 3px solid transparent;
+        padding: 0;
+        transition: all 190ms ease;
+        width: 40px;
+        -moz-appearance: button;
+        -webkit-appearance: button;
+      }
+
+      #copied {
+        visibility: hidden;
+      }
+
+      #help {
+        display: none;
+        padding: 16px;
+      }
+
+      #help h3 {
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 1.25;
+        margin-bottom: 16px;
+        margin-top: 24px;
+      }
+
+      #help p {
+        margin-bottom: 16px;
+        margin-top: 16px;
+      }
+
+      #help code {
+        background-color: var(--button-bg-color);
+        border-radius: 6px;
+        font-family: ui-monospace, "Menlo", "Monaco", "Consolas",
+          "Liberation Mono", "Courier New", monospace;
+        font-size: 14px;
+        padding: 2px 6px;
+        white-space: break-spaces;
+      }
+
+      #main-button {
+        display: none;
+      }
+
+      #main-button,
+      #help-button {
+        font-size: 18px;
+        inset-block-start: 16px;
+        inset-inline-end: 16px;
+        position: absolute;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loader"></div>
+    <div id="main">
+      <div id="token"></div>
+      <div>
+        <div id="progressbar"></div>
+        <button id="copy-button" title="Copy">
+          <svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12z"
+              fill="currentColor"
+            />
+          </svg>
+        </button>
+      </div>
+      <div id="copied">Copied!</div>
+    </div>
+    <div id="help">
+      <h3>URL Search Params</h3>
+      <p>
+        <code>secret</code> (required) , <code>algorithm</code> ,
+        <code>digits</code> , <code>period</code>
+      </p>
+      <h3>Example</h3>
+      <p><a id="example"></a></p>
+      <h3>Full Example</h3>
+      <p><a id="full-example"></a></p>
+    </div>
+    <button id="main-button" title="Main">
+      <svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3L2 12h3v8z" fill="currentColor" />
+      </svg>
+    </button>
+    <button id="help-button" title="Help">
+      <svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M10 19h3v3h-3zm2-17c5.35.22 7.68 5.62 4.5 9.67c-.83 1-2.17 1.66-2.83 2.5C13 15 13 16 13 17h-3c0-1.67 0-3.08.67-4.08c.66-1 2-1.59 2.83-2.25C15.92 8.43 15.32 5.26 12 5a3 3 0 0 0-3 3H6a6 6 0 0 1 6-6"
+          fill="currentColor"
+        />
+      </svg>
+    </button>
+    <script src="/otpauth.umd.min.js"></script>
+    <script src="/progressbar.min.js"></script>
+    <script>
+      const loaderElement = document.getElementById("loader");
+      const mainElement = document.getElementById("main");
+      const helpElement = document.getElementById("help");
+      const mainButtonElement = document.getElementById("main-button");
+      const helpButtonElement = document.getElementById("help-button");
+      const exampleElement = document.getElementById("example");
+      const fullExampleElement = document.getElementById("full-example");
+
+      try {
+        const tokenElement = document.getElementById("token");
+        const copiedElement = document.getElementById("copied");
+
+        const params = new URLSearchParams(window.location.search);
+        let secret = params.get("secret");
+        if (secret) {
+          secret = decodeURIComponent(secret).replace(/\s/g, "");
+        }
+
+        const totp = new OTPAuth.TOTP({
+          algorithm: params.get("algorithm") || "SHA1",
+          digits: params.get("digits") || 6,
+          period: params.get("period") || 30,
+          secret: secret || undefined,
+        });
+
+        const progressbar = new ProgressBar.Circle("#progressbar", {
+          color: "var(--primary-color)",
+          step: function (state, circle) {
+            var value = Math.round(circle.value() * totp.period);
+            if (value === 0) {
+              circle.setText("");
+            } else {
+              circle.setText(value);
+            }
+          },
+          strokeWidth: 8,
+          trailColor: "var(--button-bg-color)",
+          trailWidth: 8,
+        });
+
+        const setData = () => {
+          const token = totp.generate();
+          if (tokenElement.innerText !== token) {
+            tokenElement.innerText = token;
+          }
+
+          const period = totp.period;
+          const seconds = period - (Math.floor(Date.now() / 1000) % period);
+          progressbar.animate(seconds / period, { duration: 1000 });
+
+          setTimeout(setData, 1000);
+        };
+
+        setData();
+
+        document.getElementById("copy-button").addEventListener("click", () => {
+          if (copiedElement.style.visibility !== "visible") {
+            navigator.clipboard.writeText(totp.generate());
+
+            copiedElement.style.visibility = "visible";
+            setTimeout(() => {
+              copiedElement.style.visibility = "hidden";
+            }, 1000);
+          }
+        });
+      } catch (error) {
+        mainElement.innerText = "Sorry, something went wrong.";
+      } finally {
+        loaderElement.style.display = "none";
+        mainElement.style.display = "flex";
+      }
+
+      const url = new URL(window.location.origin);
+      url.searchParams.set("secret", "LVJNIG7QZ6Q5HW3S2ZVRNRCEIB7R4BE7");
+      exampleElement.href = url;
+      exampleElement.innerText = url;
+      url.searchParams.set("algorithm", "SHA1");
+      url.searchParams.set("digits", "6");
+      url.searchParams.set("period", "30");
+      fullExampleElement.href = url;
+      fullExampleElement.innerText = url;
+
+      mainButtonElement.addEventListener("click", () => {
+        mainButtonElement.style.display = "none";
+        helpButtonElement.style.display = "flex";
+        mainElement.style.display = "flex";
+        helpElement.style.display = "none";
+      });
+
+      helpButtonElement.addEventListener("click", () => {
+        mainButtonElement.style.display = "flex";
+        helpButtonElement.style.display = "none";
+        mainElement.style.display = "none";
+        helpElement.style.display = "block";
+      });
+    </script>
+  </body>
+</html>
