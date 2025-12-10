@@ -13,11 +13,13 @@
         --fg-color: #333333;
         --border-color: #d3d3d3;
         --select-bg-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjMzMzMzMzIiBkPSJNNy40MSA4LjU4TDEyIDEzLjE3bDQuNTktNC41OUwxOCAxMGwtNiA2bC02LTZ6Ii8+PC9zdmc+);
-        --button-bg-color-hover: #198cff;
-        --button-bg-color-active: #3399ff;
-        --button-fg-color: #ffffff;
+        --button-copy-link-bg-color: #f1f1f1;
+        --button-copy-link-bg-color-hover: #e6e6e6;
+        --button-copy-link-bg-color-active: #d9d9d9;
+        --button-copy-token-bg-color-hover: #198cff;
+        --button-copy-token-bg-color-active: #3399ff;
+        --button-copy-token-fg-color: #ffffff;
         --outline-color: #007fff66;
-        --toastify-shadow: 0 0 8px #0000001a;
       }
 
       @media (prefers-color-scheme: dark) {
@@ -27,11 +29,13 @@
           --fg-color: #d3d3d3;
           --border-color: #333333;
           --select-bg-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjZDNkM2QzIiBkPSJNNy40MSA4LjU4TDEyIDEzLjE3bDQuNTktNC41OUwxOCAxMGwtNiA2bC02LTZ6Ii8+PC9zdmc+);
-          --button-bg-color-hover: #0059b3;
-          --button-bg-color-active: #004d99;
-          --button-fg-color: #e6e6e6;
+          --button-copy-link-bg-color: #333333;
+          --button-copy-link-bg-color-hover: #404040;
+          --button-copy-link-bg-color-active: #4d4d4d;
+          --button-copy-token-bg-color-hover: #0059b3;
+          --button-copy-token-bg-color-active: #004d99;
+          --button-copy-token-fg-color: #e6e6e6;
           --outline-color: #0066cc66;
-          --toastify-shadow: 0 0 8px #ffffff1a;
         }
       }
 
@@ -175,70 +179,75 @@
         top: 0;
       }
 
-      button {
-        background-color: var(--primary-color);
+      .button {
+        background-color: transparent;
         border: none;
         border-radius: 50%;
-        color: var(--button-fg-color);
+        color: inherit;
         cursor: pointer;
         display: flex;
         font-size: inherit;
         margin: 0;
         outline: 2px solid transparent;
         outline-offset: 0;
-        padding: 12px;
+        padding: 0;
         transition: all 233ms ease;
       }
 
-      button:hover {
-        background-color: var(--button-bg-color-hover);
-      }
-
-      button:active {
-        background-color: var(--button-bg-color-active);
-      }
-
-      button:focus {
+      .button:focus {
         outline-color: var(--outline-color);
       }
 
-      button:focus:not(:focus-visible) {
+      .button:focus:not(:focus-visible) {
         outline-color: transparent;
       }
 
-      button:focus-visible {
+      .button:focus-visible {
         outline-color: var(--outline-color);
       }
 
-      .toastify {
-        --toastify-bg-color: var(--fg-color);
-        --toastify-fg-color: var(--bg-color);
-        background-color: var(--toastify-bg-color);
-        border-radius: 4px;
-        box-shadow: var(--toastify-shadow);
-        color: var(--toastify-fg-color);
-        font-size: 14px;
-        opacity: 0;
-        padding: 8px 12px;
+      .button-copy-token {
+        background-color: var(--primary-color);
+        color: var(--button-copy-token-fg-color);
+        padding: 12px;
+      }
+
+      .button-copy-token:hover {
+        background-color: var(--button-copy-token-bg-color-hover);
+      }
+
+      .button-copy-token:active {
+        background-color: var(--button-copy-token-bg-color-active);
+      }
+
+      .button-copy-link {
+        background-color: var(--button-copy-link-bg-color);
+        color: var(--primary-color);
+        font-size: 20px;
+        padding: 8px;
         position: fixed;
-        transition: all 233ms cubic-bezier(0.215, 0.61, 0.355, 1);
-        z-index: 233;
+        right: 12px;
+        top: 12px;
       }
 
-      .toastify.on {
-        opacity: 1;
+      .button-copy-link:hover {
+        background-color: var(--button-copy-link-bg-color-hover);
       }
 
-      .toastify-bottom {
-        bottom: -80px;
+      .button-copy-link:active {
+        background-color: var(--button-copy-link-bg-color-active);
       }
 
-      .toastify-center {
-        left: 16px;
-        margin-left: auto;
-        margin-right: auto;
-        max-width: fit-content;
-        right: 16px;
+      .tippy-box {
+        --tippy-bg-color: var(--fg-color);
+        --tippy-fg-color: var(--bg-color);
+        background-color: var(--tippy-bg-color);
+        color: var(--tippy-fg-color);
+        line-height: inherit;
+      }
+
+      .tippy-content {
+        padding: 4px 8px;
       }
     </style>
   </head>
@@ -300,7 +309,7 @@
         <div id="token">-</div>
         <div id="countdown">-s</div>
       </div>
-      <button id="copy" title="Copy token to clipboard">
+      <button class="button button-copy-token" id="copy-token">
         <svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true">
           <path
             d="M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12z"
@@ -308,9 +317,18 @@
           />
         </svg>
       </button>
+      <button class="button button-copy-link" id="copy-link">
+        <svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7a5 5 0 0 0-5 5a5 5 0 0 0 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1M8 13h8v-2H8zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4a5 5 0 0 0 5-5a5 5 0 0 0-5-5"
+            fill="currentColor"
+          />
+        </svg>
+      </button>
     </main>
     <script src="/otpauth.umd.min.js"></script>
-    <script src="/toastify-js.min.js"></script>
+    <script src="/popper.min.js"></script>
+    <script src="/tippy-bundle.umd.min.js"></script>
     <script>
       const params = new URLSearchParams(window.location.search);
       const defaultParams = {
@@ -346,7 +364,7 @@
 
       const checkParams = () => {
         if (timeoutId) {
-          window.clearTimeout(timeoutId);
+          clearTimeout(timeoutId);
           timeoutId = null;
         }
 
@@ -388,18 +406,49 @@
 
       checkParams();
 
-      document.getElementById("copy").addEventListener("click", () => {
+      const setupCopyButton = (elementId, message, copyAction) => {
+        const copyElement = document.getElementById(elementId);
+
+        const copyTippy = tippy(copyElement, {
+          arrow: false,
+          hideOnClick: false,
+          placement: "bottom",
+          onHide: (instance) => {
+            if (copyTimeoutId) {
+              clearTimeout(copyTimeoutId);
+              copyTimeoutId = null;
+            }
+          },
+          onShow: (instance) => {
+            instance.setContent(message);
+          },
+        });
+
+        let copyTimeoutId;
+
+        copyElement.addEventListener("click", () => {
+          if (copyTimeoutId) {
+            clearTimeout(copyTimeoutId);
+            copyTimeoutId = null;
+          }
+
+          const valueToCopy = copyAction();
+          if (valueToCopy) {
+            copyToClipboard(valueToCopy);
+            copyTippy.setContent("Copied!");
+            copyTimeoutId = setTimeout(() => {
+              copyTippy.setContent(message);
+            }, 2333);
+          }
+        });
+      };
+
+      setupCopyButton("copy-token", "Copy token to clipboard", () => {
         const token = tokenElement.innerText;
-        if (token !== "-") {
-          copyToClipboard(token);
-          Toastify({
-            text: "The token has been copied to clipboard",
-            gravity: "bottom",
-            position: "center",
-            offset: { y: 1 },
-            stopOnFocus: false,
-          }).showToast();
-        }
+        return token === "-" ? null : token;
+      });
+      setupCopyButton("copy-link", "Copy link to clipboard", () => {
+        return window.location.href;
       });
 
       const copyToClipboard = (data) => {
